@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 import click
 import logging
 import logging.config
 
-from penne_shell.penne_shell import Monitor
+from penne_shell.penne_shell import monitor
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ LOGGING = {
     'loggers': {
         'penne_shell': {
             'handlers': ['console'],
-            'level': 'DEBUG'
+            'level': 'INFO'
         }
     }
 }
@@ -40,11 +40,13 @@ def _config_logging(logging_level='INFO'):
 
 @click.command()
 @click.argument('monitored_path')
-def main(monitored_path):
-
-    _config_logging()
-    logger.info('Monitoring %s' % monitored_path)
-
+@click.option(
+    '--logging_level', '-l', default='INFO',
+    type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
+)
+def main(monitored_path, logging_level):
+    _config_logging(logging_level=logging_level)
+    monitor(monitored_path)
 
 if __name__ == "__main__":
     main()
