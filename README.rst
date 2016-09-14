@@ -1,7 +1,7 @@
 penne_shell
 ===========
 
-Monitora eventos em file system para engatilhar tarefas de avaliação de pacotes SciELO PS.
+Monitora eventos em file system para engatilhar tarefas de avaliação de pacotes SciELO PS
 
 
 Status

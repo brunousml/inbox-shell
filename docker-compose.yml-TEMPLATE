@@ -22,7 +22,7 @@ services:
             - /host/etc/pureftpd:/etc/pureftpd
 
     monitor:
-        image: monitor
+        image: "scieloorg/penne-shell"
         restart: always
         hostname: monitor
         networks:
