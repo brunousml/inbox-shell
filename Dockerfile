@@ -17,9 +17,6 @@ RUN pip install -r requirements.txt
 
 RUN python setup.py install
 
-EXPOSE 21
-EXPOSE 64000-64500
-
 ADD docker/entrypoint.sh /app/docker/entrypoint.sh
 RUN chmod +x /app/docker/entrypoint.sh
 
