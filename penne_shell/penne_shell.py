@@ -11,6 +11,7 @@ from watchdog.events import LoggingEventHandler
 from watchdog.events import FileSystemEventHandler
 
 from penne_shell import tasks
+from penne_shell import settings
 
 logger = logging.getLogger(__name__)
 
@@ -51,15 +52,18 @@ class Inspector(object):
 class EventHandler(FileSystemEventHandler):
 
     logfilename = 'report.log'
-    files = {}
+
+    def __init__(self, safe_mode=settings.SAFE_MODE):
+        self._safe_mode = safe_mode
+        self._files = {}
 
     def is_file_size_stucked(self, logpath):
-        status = self.files.setdefault(logpath, 0)
+        status = self._files.setdefault(logpath, 0)
         current = os.path.getsize(logpath)
         if not status == current:
-            self.files[logpath] = current
+            self._files[logpath] = current
             return False
-        del(self.files[logpath])
+        del(self._files[logpath])
         return True
 
     def write_log(self, logpath, message):
@@ -84,6 +88,11 @@ class EventHandler(FileSystemEventHandler):
                 msg = 'New directory detected: %s' % event.src_path
                 logger.debug(msg)
                 self.write_log(event.src_path, msg)
+                if self._safe_mode:  # skiping to remove data from FTP.
+                    msg = 'Directory is not valid it will be skipped: %s' % event.src_path
+                    logger.debug(msg)
+                    self.write_log(event.src_path, msg)
+                    return False
                 os.rmdir(event.src_path)
                 msg = 'Directory removed: %s' % event.src_path
                 logger.debug(msg)
@@ -111,8 +120,14 @@ class EventHandler(FileSystemEventHandler):
                 msg = "File is valid, sending for processing: %s" % event.src_path
                 logger.debug(msg)
                 self.write_log(event.src_path, msg)
-                tasks.sendfile.delay(event.src_path)
+                tasks.uploadfile.delay(event.src_path, self._safe_mode)
                 return None
+
+            if self._safe_mode:  # skiping to remove data from FTP.
+                msg = 'File is not valid it will be skipped: %s' % event.src_path
+                logger.debug(msg)
+                self.write_log(event.src_path, msg)
+                return False
 
             os.remove(event.src_path)
             msg = "File is not valid (%s), removed from server: %s" % (validation_message, event.src_path)
@@ -124,11 +139,13 @@ class EventHandler(FileSystemEventHandler):
             return None
 
 
-def monitor(monitored_path):
+def monitor(monitored_path, safe_mode=settings.SAFE_MODE):
 
-    event_handler = EventHandler()
+    event_handler = EventHandler(safe_mode=safe_mode)
     observer = Observer()
-    observer.schedule(event_handler, monitored_path, recursive=True)
+    observer.schedule(
+        event_handler, monitored_path, recursive=True
+    )
     observer.start()
     logger.info('Starting to monitor the directory: %s' % monitored_path)
 

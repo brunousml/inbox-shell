@@ -1,0 +1,54 @@
+version: '2'
+
+networks:
+   penne_shell:
+        external: false
+
+services:
+
+    pureftp:
+        image: "infrascielo/pureftp"
+        restart: always
+        hostname: pureftp
+        networks:
+            - penne_shell
+        environment:
+            - PUREFTP_PASSIVE_IP=192.168.100.99
+        ports:
+            - "21:21"
+            - "40000-40020:40000:40020"
+        volumes:
+            - /host/ftp:/home/ftpuser
+            - /host/etc/pureftpd:/etc/pureftpd
+
+    monitor:
+        image: monitor
+        restart: always
+        hostname: monitor
+        networks:
+            - penne_shell
+        links:
+            - rabbitmq:rabbitmq
+        depends_on:
+            - rabbitmq
+            - pureftp
+        environment:
+            - C_FORCE_ROOT=True
+            - RABBITMQ_HOST=rabbitmq
+            - SAFE_MODE=True
+            - FRONT_DESK_HOST=192.168.169.119:8000
+            - MONITORING_FOLDER=/home/ftpuser
+        volumes:
+            - /host/ftp:/home/ftpuser
+
+    rabbitmq:
+        image: rabbitmq
+        restart: always
+        hostname: rabbitmq
+        networks:
+            - penne_shell
+        ports:
+            - "4369:4369"
+            - "25672:25672"
+            - "5671:5671"
+            - "5672:5672"

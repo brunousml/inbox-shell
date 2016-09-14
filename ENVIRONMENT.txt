@@ -1,0 +1,13 @@
+# Indica o domíno da ferramenta FrontDesk para depósito de pacotes carregados
+# no FTP
+FRONTDESK_HOST=127.0.0.1:80
+
+# Indica o diretório que será monitorado pelo Monitor
+MONITORING_FOLDER=/home
+
+# Host name of the RabbitMQ
+RABBITMQ_HOST=guest@rabbitmq
+
+# Safe mode indica se o Monitor excluirá arquivos do diretório monitorado quando
+# estes não estiverem em conformidade com o formato esperado.
+SAFE_MODE=True

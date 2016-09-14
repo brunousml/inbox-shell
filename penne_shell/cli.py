@@ -5,6 +5,7 @@ import logging
 import logging.config
 
 from penne_shell.penne_shell import monitor
+from penne_shell import settings
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +40,15 @@ def _config_logging(logging_level='INFO'):
 
 
 @click.command()
-@click.argument('monitored_path')
+@click.argument('monitored_path', default=settings.MONITORING_FOLDER)
+@click.option('--safe_mode', '-s', is_flag=True)
 @click.option(
     '--logging_level', '-l', default='INFO',
     type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
 )
-def main(monitored_path, logging_level):
+def main(monitored_path, safe_mode, logging_level):
     _config_logging(logging_level=logging_level)
-    monitor(monitored_path)
+    monitor(monitored_path, safe_mode=safe_mode)
 
 if __name__ == "__main__":
     main()
