@@ -47,6 +47,10 @@ def _config_logging(logging_level='INFO'):
     type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
 )
 def main(monitored_path, safe_mode, logging_level):
+
+    if not safe_mode and settings.SAFE_MODE:
+        safe_mode = True
+
     _config_logging(logging_level=logging_level)
     monitor(monitored_path, safe_mode=safe_mode)
 

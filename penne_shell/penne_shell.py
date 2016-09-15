@@ -140,14 +140,36 @@ class EventHandler(FileSystemEventHandler):
 
 
 def monitor(monitored_path, safe_mode=settings.SAFE_MODE):
+    """
+    Monitor inicia instancias de observadores de mudanças em diretórios.
 
-    event_handler = EventHandler(safe_mode=safe_mode)
-    observer = Observer()
-    observer.schedule(
-        event_handler, monitored_path, recursive=True
-    )
-    observer.start()
-    logger.info('Starting to monitor the directory: %s' % monitored_path)
+    :param monitored_path:
+        Path absoluto para o diretório root do FTP server, neste diretório devem
+        conter os diretórios das contas de FTP dos usuários do FTP.
+    :type path:
+        ``str``
+
+    :param safe_mode:
+        Indica aos monitores se os arquivos e diretórios criados fora de
+        conformidade com o padrão aceito, podem ser removidos do FTP.
+        Quando definido como True os arquivos fora de conformidade são
+        preservados
+    :type path:
+        ``bool``
+
+    :return:
+        ``None``
+    """
+    directories_in_ftp_root_dir = [os.path.join(monitored_path, name) for name in os.listdir(monitored_path) if os.path.isdir(os.path.join(monitored_path, name)) ]
+
+    for directory in directories_in_ftp_root_dir:
+        event_handler = EventHandler(safe_mode=safe_mode)
+        observer = Observer()
+        observer.schedule(
+            event_handler, directory, recursive=False
+        )
+        logger.info('Starting to monitor for the directory: %s' % directory)
+        observer.start()
 
     try:
         while True:
