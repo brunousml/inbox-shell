@@ -53,9 +53,10 @@ class EventHandler(FileSystemEventHandler):
 
     logfilename = 'report.log'
 
-    def __init__(self, safe_mode=settings.SAFE_MODE):
+    def __init__(self, directory, safe_mode=settings.SAFE_MODE):
         self._safe_mode = safe_mode
         self._files = {}
+        self.depositor = directory.split('/')[-1]
 
     def is_file_size_stucked(self, logpath):
         status = self._files.setdefault(logpath, 0)
@@ -120,7 +121,9 @@ class EventHandler(FileSystemEventHandler):
                 msg = "File is valid, sending for processing: %s" % event.src_path
                 logger.debug(msg)
                 self.write_log(event.src_path, msg)
-                tasks.uploadfile.delay(event.src_path, self._safe_mode)
+                tasks.uploadfile.delay(
+                    event.src_path, self.depositor, self._safe_mode
+                )
                 return None
 
             if self._safe_mode:  # skiping to remove data from FTP.
@@ -160,10 +163,15 @@ def monitor(monitored_path, safe_mode=settings.SAFE_MODE):
     :return:
         ``None``
     """
-    directories_in_ftp_root_dir = [os.path.join(monitored_path, name) for name in os.listdir(monitored_path) if os.path.isdir(os.path.join(monitored_path, name)) ]
+    try:
+        directories_in_ftp_root_dir = [os.path.join(monitored_path, name) for name in os.listdir(monitored_path) if os.path.isdir(os.path.join(monitored_path, name)) ]
+    except FileNotFoundError:
+        logger.error('Directory not found: %s' % monitored_path)
+        logger.error('Monitor is shutting down')
+        return None
 
     for directory in directories_in_ftp_root_dir:
-        event_handler = EventHandler(safe_mode=safe_mode)
+        event_handler = EventHandler(directory, safe_mode=safe_mode)
         observer = Observer()
         observer.schedule(
             event_handler, directory, recursive=False

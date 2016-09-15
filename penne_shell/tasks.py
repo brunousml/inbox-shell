@@ -12,15 +12,15 @@ logger = logging.getLogger(__name__)
 celery_broker = 'amqp://%s//' % settings.RABBITMQ_HOST
 app = Celery('tasks', broker=celery_broker)
 
+fd = FrontDesk()
+
 
 @app.task
-def uploadfile(filename, safe_mode):
+def uploadfile(filename, depositor, safe_mode):
     logger.info('Scheduling file to be sent: %s' % filename)
 
-    fd = FrontDesk()
-
     try:
-        fd.uploadfile(filename)
+        fd.uploadfile(filename, depositor)
     except Exception as err:
         logger.exception(sys.exc_info()[0])
 

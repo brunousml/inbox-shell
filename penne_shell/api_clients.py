@@ -23,7 +23,7 @@ class FrontDesk(object):
 
         self._host = host
 
-    def uploadfile(self, fl):
+    def uploadfile(self, fl, depositor='anonymous'):
         endpoint = 'frontdesk/deposits/'
 
         flo = open(fl, 'rb')
@@ -32,7 +32,8 @@ class FrontDesk(object):
             'package': flo
         }
         params = {
-            'md5_sum': md5_sum
+            'md5_sum': md5_sum,
+            'depositor': depositor
         }
         url = 'http://%s/%s' % (self._host, endpoint)
         try:
