@@ -18,11 +18,11 @@ services:
             - "21:21"
             - "40000-40020:40000-40020"
         volumes:
-            - /host/ftp:/home/ftpuser
-            - /host/etc/pureftpd:/etc/pureftpd
+            - /containers_host/ftp:/home/ftpuser
+            - /containers_host/ftp_conf:/etc/pureftpd
 
     monitor:
-        image: "scieloorg/penne-shell"
+        image: "scieloorg/monitor"
         restart: always
         hostname: monitor
         networks:
@@ -39,7 +39,7 @@ services:
             - FRONT_DESK_HOST=192.168.169.119:8000
             - MONITORING_FOLDER=/home/ftpuser
         volumes:
-            - /host/ftp:/home/ftpuser
+            - /containers_host/ftp:/home/ftpuser
 
     rabbitmq:
         image: rabbitmq
