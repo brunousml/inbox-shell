@@ -22,7 +22,7 @@ services:
             - /containers_host/ftp_conf:/etc/pureftpd
 
     monitor:
-        image: "scieloorg/monitor"
+        image: "scieloorg/penne-shell-monitor"
         restart: always
         hostname: monitor
         networks:
