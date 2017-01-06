@@ -42,6 +42,6 @@ class FrontDesk(object):
                 data=params,
                 files=files
             )
-        except requests.exceptions.RequestException as exp:
+        except requests.exceptions.RequestException:
             logger.exception(sys.exc_info()[0])
             raise RequestException("Request fail: %s (%s)" % (url, str(files.update(params))))

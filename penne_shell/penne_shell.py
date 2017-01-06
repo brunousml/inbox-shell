@@ -7,7 +7,6 @@ import sys
 import os
 
 from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler
 from watchdog.events import FileSystemEventHandler
 
 from penne_shell import tasks
@@ -23,7 +22,7 @@ class Inspector(object):
     """
 
     def __init__(self, filename):
-        logger.info('Inspecting file: %s' % filename)
+        logger.info('Inspecting file: %s', filename)
 
         self._file = filename
         self._filename = filename.split('/')[-1]
@@ -80,7 +79,7 @@ class EventHandler(FileSystemEventHandler):
             f.write(line)
 
     def on_created(self, event):
-        slp_time = 3
+
         if self.logfilename in event.src_path:
             return False
 
@@ -137,7 +136,7 @@ class EventHandler(FileSystemEventHandler):
             logger.debug(msg)
             self.write_log(event.src_path, msg)
 
-        except Exception as err:
+        except Exception:
             logger.exception(sys.exc_info()[0])
             return None
 
@@ -166,7 +165,7 @@ def monitor(monitored_path, safe_mode=settings.SAFE_MODE):
     try:
         directories_in_ftp_root_dir = [os.path.join(monitored_path, name) for name in os.listdir(monitored_path) if os.path.isdir(os.path.join(monitored_path, name)) ]
     except FileNotFoundError:
-        logger.error('Directory not found: %s' % monitored_path)
+        logger.error('Directory not found: %s', monitored_path)
         logger.error('Monitor is shutting down')
         return None
 
@@ -176,7 +175,7 @@ def monitor(monitored_path, safe_mode=settings.SAFE_MODE):
         observer.schedule(
             event_handler, directory, recursive=False
         )
-        logger.info('Starting to monitor for the directory: %s' % directory)
+        logger.info('Starting to monitor for the directory: %s', directory)
         observer.start()
 
     try:
